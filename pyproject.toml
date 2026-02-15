@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resa-pro"
+version = "0.1.0"
+description = "RESA Pro — Rocket Engine Sizing and Analysis"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Space Team Aachen"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "CoolProp>=6.6",
+    "click>=8.1",
+    "rich>=13.0",
+    "h5py>=3.9",
+    "pint>=0.22",
+]
+
+[project.optional-dependencies]
+cad = [
+    "cadquery>=2.3",
+    "trimesh>=4.0",
+]
+ui = [
+    "PySide6>=6.5",
+    "pyvista>=0.42",
+    "pyqtgraph>=0.13",
+    "qdarkstyle>=3.1",
+]
+reports = [
+    "reportlab>=4.0",
+    "Jinja2>=3.1",
+    "plotly>=5.18",
+    "weasyprint>=60.0",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "black>=23.0",
+    "mypy>=1.5",
+    "ruff>=0.1",
+]
+all = ["resa-pro[cad,ui,reports,dev]"]
+
+[project.scripts]
+resa = "resa_pro.cli.main:cli"
+
+[tool.setuptools.packages.find]
+include = ["resa_pro*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

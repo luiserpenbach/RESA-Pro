@@ -1,0 +1,92 @@
+{
+    "ethanol": {
+        "coolprop_name": "Ethanol",
+        "formula": "C2H5OH",
+        "type": "fuel",
+        "molar_mass": 0.04607,
+        "description": "Ethanol (ethyl alcohol)",
+        "backend": "HEOS",
+        "notes": "Common bipropellant fuel, used in many amateur/university engines"
+    },
+    "n2o": {
+        "coolprop_name": "NitrousOxide",
+        "formula": "N2O",
+        "type": "oxidizer",
+        "molar_mass": 0.044013,
+        "description": "Nitrous oxide",
+        "backend": "HEOS",
+        "notes": "Self-pressurizing oxidizer, two-phase behavior important for cooling"
+    },
+    "lox": {
+        "coolprop_name": "Oxygen",
+        "formula": "O2",
+        "type": "oxidizer",
+        "molar_mass": 0.032,
+        "description": "Liquid oxygen",
+        "backend": "HEOS",
+        "notes": "Standard cryogenic oxidizer"
+    },
+    "rp1": {
+        "coolprop_name": "n-Dodecane",
+        "formula": "C12H26",
+        "type": "fuel",
+        "molar_mass": 0.17034,
+        "description": "RP-1 kerosene (modeled as n-dodecane)",
+        "backend": "HEOS",
+        "notes": "RP-1 approximated by n-dodecane for thermodynamic properties"
+    },
+    "methane": {
+        "coolprop_name": "Methane",
+        "formula": "CH4",
+        "type": "fuel",
+        "molar_mass": 0.01604,
+        "description": "Liquid methane",
+        "backend": "HEOS",
+        "notes": "Increasingly popular cryogenic fuel"
+    },
+    "hydrogen": {
+        "coolprop_name": "Hydrogen",
+        "formula": "H2",
+        "type": "fuel",
+        "molar_mass": 0.00202,
+        "description": "Liquid hydrogen",
+        "backend": "HEOS",
+        "notes": "Highest Isp cryogenic fuel"
+    },
+    "nitrogen": {
+        "coolprop_name": "Nitrogen",
+        "formula": "N2",
+        "type": "pressurant",
+        "molar_mass": 0.02802,
+        "description": "Nitrogen gas (pressurant)",
+        "backend": "HEOS",
+        "notes": "Common pressurant gas"
+    },
+    "helium": {
+        "coolprop_name": "Helium",
+        "formula": "He",
+        "type": "pressurant",
+        "molar_mass": 0.004003,
+        "description": "Helium gas (pressurant)",
+        "backend": "HEOS",
+        "notes": "Lightweight pressurant, ideal for flight systems"
+    },
+    "water": {
+        "coolprop_name": "Water",
+        "formula": "H2O",
+        "type": "coolant",
+        "molar_mass": 0.01802,
+        "description": "Water (for ground test cooling)",
+        "backend": "HEOS",
+        "notes": "Used as coolant in ground-test regenerative cooling circuits"
+    },
+    "isopropanol": {
+        "coolprop_name": "Isopropanol",
+        "formula": "C3H7OH",
+        "type": "fuel",
+        "molar_mass": 0.06010,
+        "description": "Isopropanol (isopropyl alcohol)",
+        "backend": "HEOS",
+        "notes": "Alternative alcohol fuel"
+    }
+}

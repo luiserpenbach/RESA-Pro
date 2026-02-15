@@ -1,0 +1,8 @@
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+CoolProp>=6.6
+click>=8.1
+rich>=13.0
+h5py>=3.9
+pint>=0.22

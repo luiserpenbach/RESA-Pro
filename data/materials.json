@@ -1,0 +1,121 @@
+{
+    "copper_c10100": {
+        "name": "C10100 OFE Copper",
+        "category": "copper_alloy",
+        "density": 8941,
+        "melting_point": 1356,
+        "thermal_conductivity": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "k": [391, 388, 383, 377, 371, 365, 357, 348, 339]
+        },
+        "specific_heat": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "cp": [385, 393, 403, 413, 423, 433, 443, 453, 463]
+        },
+        "yield_strength_20C": 69,
+        "ultimate_tensile_20C": 221,
+        "notes": "Oxygen-free electronic copper. Excellent thermal conductivity."
+    },
+    "copper_c18150": {
+        "name": "C18150 CuCrZr",
+        "category": "copper_alloy",
+        "density": 8890,
+        "melting_point": 1343,
+        "thermal_conductivity": {
+            "T": [293, 373, 473, 573, 673, 773, 873],
+            "k": [324, 330, 335, 338, 335, 325, 310]
+        },
+        "specific_heat": {
+            "T": [293, 373, 473, 573, 673, 773, 873],
+            "cp": [385, 393, 403, 413, 423, 433, 443]
+        },
+        "yield_strength_20C": 310,
+        "ultimate_tensile_20C": 448,
+        "notes": "Precipitation-hardened copper alloy. Good strength + conductivity."
+    },
+    "ss316": {
+        "name": "316 Stainless Steel",
+        "category": "stainless_steel",
+        "density": 7990,
+        "melting_point": 1673,
+        "thermal_conductivity": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "k": [13.4, 14.7, 16.2, 17.6, 19.1, 20.5, 21.9, 23.3, 24.7]
+        },
+        "specific_heat": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "cp": [500, 510, 525, 540, 555, 570, 585, 600, 615]
+        },
+        "yield_strength_20C": 205,
+        "ultimate_tensile_20C": 515,
+        "notes": "Austenitic stainless steel. Good corrosion resistance."
+    },
+    "inconel_718": {
+        "name": "Inconel 718",
+        "category": "nickel_alloy",
+        "density": 8190,
+        "melting_point": 1609,
+        "thermal_conductivity": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "k": [11.4, 12.6, 14.0, 15.5, 17.0, 18.6, 20.5, 22.3, 24.5]
+        },
+        "specific_heat": {
+            "T": [293, 373, 473, 573, 673, 773, 873, 973, 1073],
+            "cp": [435, 450, 470, 490, 510, 530, 555, 580, 610]
+        },
+        "yield_strength_20C": 1034,
+        "ultimate_tensile_20C": 1241,
+        "notes": "High-strength nickel superalloy. Excellent at high temperatures."
+    },
+    "al6061_t6": {
+        "name": "6061-T6 Aluminum",
+        "category": "aluminum_alloy",
+        "density": 2700,
+        "melting_point": 855,
+        "thermal_conductivity": {
+            "T": [293, 373, 423, 473, 523, 573],
+            "k": [167, 172, 176, 180, 184, 188]
+        },
+        "specific_heat": {
+            "T": [293, 373, 423, 473, 523, 573],
+            "cp": [896, 942, 963, 984, 1005, 1026]
+        },
+        "yield_strength_20C": 276,
+        "ultimate_tensile_20C": 310,
+        "notes": "Common structural aluminum. Used for tanks, structures."
+    },
+    "graphite": {
+        "name": "Graphite (ATJ grade)",
+        "category": "ablative",
+        "density": 1780,
+        "melting_point": 3800,
+        "thermal_conductivity": {
+            "T": [293, 500, 750, 1000, 1500, 2000, 2500],
+            "k": [120, 95, 72, 58, 42, 35, 30]
+        },
+        "specific_heat": {
+            "T": [293, 500, 750, 1000, 1500, 2000, 2500],
+            "cp": [710, 1200, 1510, 1700, 1920, 2050, 2130]
+        },
+        "yield_strength_20C": 35,
+        "ultimate_tensile_20C": 35,
+        "notes": "Ablative throat insert material. Sublimation above ~3600 K."
+    },
+    "silica_phenolic": {
+        "name": "Silica Phenolic",
+        "category": "ablative",
+        "density": 1720,
+        "melting_point": 2500,
+        "thermal_conductivity": {
+            "T": [293, 500, 750, 1000, 1500],
+            "k": [0.56, 0.65, 0.78, 0.95, 1.2]
+        },
+        "specific_heat": {
+            "T": [293, 500, 750, 1000, 1500],
+            "cp": [1050, 1250, 1450, 1600, 1800]
+        },
+        "yield_strength_20C": 55,
+        "ultimate_tensile_20C": 85,
+        "notes": "Ablative composite for chamber liners and nozzle extensions."
+    }
+}
