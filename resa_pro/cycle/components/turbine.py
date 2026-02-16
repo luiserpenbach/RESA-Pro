@@ -76,11 +76,17 @@ class Turbine(CycleComponent):
         # Shaft power [W] (positive = produced)
         P_shaft = w * inlet.mass_flow
 
+        # Outlet density from ideal gas: rho_out = rho_in * (P_out/P_in) * (T_in/T_out)
+        if inlet.pressure > 0 and T_out > 0:
+            rho_out = inlet.density * (outlet_pressure / inlet.pressure) * (inlet.temperature / T_out)
+        else:
+            rho_out = inlet.density
+
         outlet = FluidState(
             pressure=outlet_pressure,
             temperature=T_out,
             mass_flow=inlet.mass_flow,
-            density=inlet.density * (outlet_pressure / inlet.pressure) if inlet.pressure > 0 else 0.0,
+            density=rho_out,
             enthalpy=inlet.enthalpy - w,
             fluid_name=inlet.fluid_name,
         )

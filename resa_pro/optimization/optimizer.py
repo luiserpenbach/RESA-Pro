@@ -288,12 +288,26 @@ class DesignOptimizer:
                 seed=seed,
             )
         else:
+            # Build options dict with method-appropriate tolerance key
+            opts: dict[str, Any] = {"maxiter": max_iter}
+            m = method.lower()
+            if m == "nelder-mead":
+                opts["xatol"] = tol
+                opts["fatol"] = tol
+            elif m in ("l-bfgs-b", "tnc", "slsqp", "trust-constr", "bfgs", "cg", "newton-cg"):
+                opts["gtol"] = tol
+            elif m == "powell":
+                opts["ftol"] = tol
+            else:
+                opts["ftol"] = tol
+
+            bounded_methods = ("l-bfgs-b", "tnc", "slsqp", "trust-constr")
             result = minimize(
                 cost_function,
                 x0,
                 method=method,
-                bounds=bounds if method.lower() in ("l-bfgs-b", "tnc", "slsqp", "trust-constr") else None,
-                options={"maxiter": max_iter, "xatol" if method.lower() == "nelder-mead" else "gtol": tol},
+                bounds=bounds if m in bounded_methods else None,
+                options=opts,
             )
 
         # Find best feasible point

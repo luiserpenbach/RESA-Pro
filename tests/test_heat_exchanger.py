@@ -107,3 +107,23 @@ class TestHeatExchanger:
         hx_high.compute(_hot_gas(), cold_inlet=_cold_fuel())
 
         assert hx_high.cold_outlet.temperature > hx_low.cold_outlet.temperature
+
+    def test_pinch_point_clamp(self):
+        """Cold outlet should never exceed hot inlet temperature."""
+        # Use very high effectiveness and very small hot-side capacity
+        # to trigger potential pinch violation
+        hx = HeatExchanger(effectiveness=1.0, dp_hot=0, dp_cold=0)
+        hot_in = FluidState(
+            pressure=10e5, temperature=500.0,
+            mass_flow=0.01,  # very small hot flow
+            density=2.0, enthalpy=7.5e5, fluid_name="hot",
+        )
+        cold_in = FluidState(
+            pressure=20e5, temperature=400.0,
+            mass_flow=1.0,  # much larger cold flow
+            density=800.0, enthalpy=0.0, fluid_name="cold",
+        )
+        hx.compute(hot_in, cold_inlet=cold_in, cp_hot=1500.0, cp_cold=2500.0)
+
+        # Cold outlet must not exceed hot inlet
+        assert hx.cold_outlet.temperature <= hot_in.temperature + 0.01

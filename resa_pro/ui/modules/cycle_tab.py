@@ -45,13 +45,18 @@ class CycleTab(QWidget):
         self.form.add_float("Tc", "Chamber Temp", 3100.0, unit="K", min_val=500, max_val=5000, step=50)
 
         self.form.add_separator()
+        self.form.add_header("Nozzle")
+        self.form.add_float("expansion_ratio", "Expansion Ratio", 10.0, min_val=1.5, max_val=200, step=0.5)
+
+        self.form.add_separator()
         self.form.add_header("Propellant Properties")
         self.form.add_float("ox_density", "Oxidizer Density", 1220.0, unit="kg/m3", min_val=1, max_val=5000, step=10)
         self.form.add_float("fuel_density", "Fuel Density", 789.0, unit="kg/m3", min_val=1, max_val=5000, step=10)
 
         self.form.add_separator()
         self.form.add_header("Turbopump (GG/Expander)")
-        self.form.add_float("pump_eff", "Pump Efficiency", 0.65, min_val=0.3, max_val=0.95, step=0.01)
+        self.form.add_float("ox_pump_eff", "Ox Pump Efficiency", 0.65, min_val=0.3, max_val=0.95, step=0.01)
+        self.form.add_float("fuel_pump_eff", "Fuel Pump Efficiency", 0.65, min_val=0.3, max_val=0.95, step=0.01)
         self.form.add_float("turbine_eff", "Turbine Efficiency", 0.60, min_val=0.3, max_val=0.95, step=0.01)
         self.form.add_float("turbine_T_in", "Turbine Inlet Temp", 800.0, unit="K", min_val=300, max_val=2000, step=10)
 
@@ -104,10 +109,11 @@ class CycleTab(QWidget):
                 c_star=v["c_star"],
                 gamma=v["gamma"],
                 Tc=v["Tc"],
+                expansion_ratio=v["expansion_ratio"],
                 ox_density=v["ox_density"],
                 fuel_density=v["fuel_density"],
-                ox_pump_efficiency=v["pump_eff"],
-                fuel_pump_efficiency=v["pump_eff"],
+                ox_pump_efficiency=v["ox_pump_eff"],
+                fuel_pump_efficiency=v["fuel_pump_eff"],
                 turbine_efficiency=v["turbine_eff"],
                 turbine_inlet_temperature=v["turbine_T_in"],
             )

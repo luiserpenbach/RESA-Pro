@@ -33,6 +33,7 @@ def cycle(ctx: click.Context) -> None:
 @click.option("--gamma", type=float, default=1.21, show_default=True, help="Ratio of specific heats.")
 @click.option("--ox-density", type=float, default=1220.0, show_default=True, help="Oxidizer density [kg/m³].")
 @click.option("--fuel-density", type=float, default=789.0, show_default=True, help="Fuel density [kg/m³].")
+@click.option("--expansion-ratio", type=float, default=10.0, show_default=True, help="Nozzle expansion ratio (Ae/At).")
 @click.option("--pump-eff", type=float, default=0.65, show_default=True, help="Pump isentropic efficiency.")
 @click.option("--turbine-eff", type=float, default=0.60, show_default=True, help="Turbine isentropic efficiency.")
 @click.option("--output", "-o", type=click.Path(), default=None, help="Output file (JSON).")
@@ -47,6 +48,7 @@ def analyze_cmd(
     gamma: float,
     ox_density: float,
     fuel_density: float,
+    expansion_ratio: float,
     pump_eff: float,
     turbine_eff: float,
     output: str | None,
@@ -69,6 +71,7 @@ def analyze_cmd(
         gamma=gamma,
         ox_density=ox_density,
         fuel_density=fuel_density,
+        expansion_ratio=expansion_ratio,
         ox_pump_efficiency=pump_eff,
         fuel_pump_efficiency=pump_eff,
         turbine_efficiency=turbine_eff,

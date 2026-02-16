@@ -134,6 +134,39 @@ def generate_text_report(state: DesignState) -> str:
         _add_param(lines, "Initial Pressure", pressurant, "bottle_pressure_initial", "bar", 1e-5)
         lines.append("")
 
+    # Cycle analysis
+    cycle_data = state.performance.get("cycle")
+    if isinstance(cycle_data, dict):
+        lines.append("CYCLE ANALYSIS")
+        lines.append("-" * 40)
+        ct = cycle_data.get("cycle_type", "—")
+        _add_param_str(lines, "Cycle Type", ct.replace("_", " ").title() if isinstance(ct, str) else str(ct))
+        _add_param(lines, "Isp (delivered)", cycle_data, "Isp_delivered", "s")
+        _add_param(lines, "Total Mass Flow", cycle_data, "total_mass_flow", "kg/s")
+        _add_param(lines, "Pump Power", cycle_data, "pump_power_total", "kW", 1e-3)
+        _add_param(lines, "Turbine Power", cycle_data, "turbine_power_total", "kW", 1e-3)
+        _add_param(lines, "Power Bal. Error", cycle_data, "power_balance_error", "W")
+        _add_param(lines, "Ox Tank Pressure", cycle_data, "tank_pressure_ox", "bar", 1e-5)
+        _add_param(lines, "Fuel Tank Pressure", cycle_data, "tank_pressure_fuel", "bar", 1e-5)
+        lines.append("")
+
+    # Optimization results
+    opt_data = state.performance.get("optimization")
+    if isinstance(opt_data, dict):
+        lines.append("OPTIMIZATION RESULTS")
+        lines.append("-" * 40)
+        _add_param_str(lines, "Method", str(opt_data.get("method", "—")))
+        _add_param(lines, "Evaluations", opt_data, "n_evaluations")
+        best_vars = opt_data.get("best_variables")
+        if isinstance(best_vars, dict):
+            for var_name, val in best_vars.items():
+                _add_param_str(lines, f"  {var_name}", f"{val:.4g}" if isinstance(val, float) else str(val))
+        best_objs = opt_data.get("best_objectives")
+        if isinstance(best_objs, dict):
+            for obj_name, val in best_objs.items():
+                _add_param_str(lines, f"  {obj_name}", f"{val:.4g}" if isinstance(val, float) else str(val))
+        lines.append("")
+
     lines.append(_hr)
     lines.append(f"  Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append(f"  RESA Pro v{state.meta.version}")
@@ -258,6 +291,38 @@ def generate_html_report(state: DesignState) -> str:
         _html_row(rows, "Total Heat Load", c, "total_heat_load", "kW", 1e-3)
         _html_row(rows, "Pressure Drop", c, "total_pressure_drop", "bar", 1e-5)
         sections.append(_html_table("Regenerative Cooling", rows))
+
+    # Cycle analysis
+    cycle_data = state.performance.get("cycle")
+    if isinstance(cycle_data, dict):
+        rows = []
+        ct = cycle_data.get("cycle_type", "")
+        rows.append(("Cycle Type", ct.replace("_", " ").title() if isinstance(ct, str) else str(ct), ""))
+        _html_row(rows, "Isp (delivered)", cycle_data, "Isp_delivered", "s")
+        _html_row(rows, "Total Mass Flow", cycle_data, "total_mass_flow", "kg/s")
+        _html_row(rows, "Pump Power", cycle_data, "pump_power_total", "kW", 1e-3)
+        _html_row(rows, "Turbine Power", cycle_data, "turbine_power_total", "kW", 1e-3)
+        _html_row(rows, "Power Balance Error", cycle_data, "power_balance_error", "W")
+        _html_row(rows, "Ox Tank Pressure", cycle_data, "tank_pressure_ox", "bar", 1e-5)
+        _html_row(rows, "Fuel Tank Pressure", cycle_data, "tank_pressure_fuel", "bar", 1e-5)
+        sections.append(_html_table("Cycle Analysis", rows))
+
+    # Optimization results
+    opt_data = state.performance.get("optimization")
+    if isinstance(opt_data, dict):
+        rows = [("Method", str(opt_data.get("method", "")), "")]
+        n_eval = opt_data.get("n_evaluations")
+        if n_eval is not None:
+            rows.append(("Evaluations", str(n_eval), ""))
+        best_vars = opt_data.get("best_variables")
+        if isinstance(best_vars, dict):
+            for var_name, val in best_vars.items():
+                rows.append((var_name, f"{val:.4g}" if isinstance(val, float) else str(val), ""))
+        best_objs = opt_data.get("best_objectives")
+        if isinstance(best_objs, dict):
+            for obj_name, val in best_objs.items():
+                rows.append((obj_name, f"{val:.4g}" if isinstance(val, float) else str(val), ""))
+        sections.append(_html_table("Optimization Results", rows))
 
     # Footer
     sections.append(_html_footer(state))

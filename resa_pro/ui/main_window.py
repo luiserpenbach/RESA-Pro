@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from typing import Any
+
+from PySide6.QtCore import Qt, Signal, QObject
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -25,6 +27,33 @@ from resa_pro.ui.modules.performance_tab import PerformanceTab
 from resa_pro.ui.modules.thermal_tab import ThermalTab
 
 
+class SharedState(QObject):
+    """Shared design state that allows tabs to exchange results.
+
+    Tabs publish their computed results via ``update(key, value)`` and
+    other tabs can read them via ``get(key)``.  The ``changed`` signal
+    is emitted whenever a value is updated.
+    """
+
+    changed = Signal(str)  # emits the key that was updated
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._data: dict[str, Any] = {}
+
+    def update(self, key: str, value: Any) -> None:
+        """Store *value* under *key* and notify listeners."""
+        self._data[key] = value
+        self.changed.emit(key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Retrieve a previously stored value."""
+        return self._data.get(key, default)
+
+    def keys(self) -> list[str]:
+        return list(self._data.keys())
+
+
 class MainWindow(QMainWindow):
     """RESA Pro main application window.
 
@@ -40,6 +69,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1100, 750)
         self.resize(1300, 850)
 
+        # Shared state across tabs
+        self.shared = SharedState()
+
         # Central widget
         central = QWidget()
         self.setCentralWidget(central)
@@ -52,16 +84,29 @@ class MainWindow(QMainWindow):
         self.tabs.setDocumentMode(True)
         layout.addWidget(self.tabs)
 
-        # Add all module tabs
-        self.tabs.addTab(ChamberTab(), "Chamber")
-        self.tabs.addTab(NozzleTab(), "Nozzle")
-        self.tabs.addTab(PerformanceTab(), "Performance")
-        self.tabs.addTab(ThermalTab(), "Thermal")
-        self.tabs.addTab(InjectorTab(), "Injector")
-        self.tabs.addTab(CoolingFeedTab(), "Cooling & Feed")
-        self.tabs.addTab(CycleTab(), "Cycle")
-        self.tabs.addTab(OptimizeUQTab(), "Optimize & UQ")
-        self.tabs.addTab(ExportTab(), "Export & Info")
+        # Add all module tabs — pass shared state where applicable
+        self.chamber_tab = ChamberTab(shared=self.shared)
+        self.nozzle_tab = NozzleTab()
+        self.performance_tab = PerformanceTab()
+        self.thermal_tab = ThermalTab()
+        self.injector_tab = InjectorTab()
+        self.cooling_tab = CoolingFeedTab()
+        self.cycle_tab = CycleTab()
+        self.optimize_tab = OptimizeUQTab()
+        self.export_tab = ExportTab()
+
+        self.tabs.addTab(self.chamber_tab, "Chamber")
+        self.tabs.addTab(self.nozzle_tab, "Nozzle")
+        self.tabs.addTab(self.performance_tab, "Performance")
+        self.tabs.addTab(self.thermal_tab, "Thermal")
+        self.tabs.addTab(self.injector_tab, "Injector")
+        self.tabs.addTab(self.cooling_tab, "Cooling & Feed")
+        self.tabs.addTab(self.cycle_tab, "Cycle")
+        self.tabs.addTab(self.optimize_tab, "Optimize & UQ")
+        self.tabs.addTab(self.export_tab, "Export & Info")
+
+        # Update status bar on shared state changes
+        self.shared.changed.connect(self._on_state_changed)
 
         # Status bar
         self.status = QStatusBar()
@@ -98,6 +143,9 @@ class MainWindow(QMainWindow):
         about_action = QAction("&About", self)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
+
+    def _on_state_changed(self, key: str) -> None:
+        self.status.showMessage(f"Updated: {key}", 3000)
 
     def _show_about(self) -> None:
         from PySide6.QtWidgets import QMessageBox

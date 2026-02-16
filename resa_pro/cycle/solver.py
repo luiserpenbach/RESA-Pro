@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+import numpy as np
 from scipy.optimize import brentq
 
 from resa_pro.cycle.components.base import CycleComponent, FluidState
@@ -71,6 +72,9 @@ class CycleDefinition:
     gamma: float = 1.21
     Tc: float = 3100.0  # K — combustion chamber temperature
 
+    # Nozzle
+    expansion_ratio: float = 10.0  # area ratio A_exit / A_throat
+
     # Propellant properties
     ox_density: float = 1220.0  # kg/m³
     fuel_density: float = 789.0  # kg/m³
@@ -98,6 +102,12 @@ class CycleDefinition:
     hx_effectiveness: float = 0.80
     hx_dp_hot: float = 50000.0  # Pa — chamber-side pressure drop
     hx_dp_cold: float = 100000.0  # Pa — coolant-side pressure drop
+
+    # Fuel heat capacity (for pump temp rise and HX calculations)
+    fuel_cp: float = 2500.0  # J/(kg·K)
+
+    # Wall recovery fraction (fraction of Tc seen by HX hot side)
+    wall_recovery_fraction: float = 0.35  # typical for regen-cooled wall
 
 
 def solve_cycle(definition: CycleDefinition) -> CyclePerformance:
@@ -139,8 +149,8 @@ def _compute_flow_rates(defn: CycleDefinition) -> tuple[float, float, float]:
     )
 
     # Compute thrust coefficient and throat area
-    pe_pc = exit_pressure_ratio(defn.gamma, 10.0)  # assume ε=10 for sizing
-    CF = thrust_coefficient(defn.gamma, 10.0, pe_pc, pa_pc=0.0)
+    pe_pc = exit_pressure_ratio(defn.gamma, defn.expansion_ratio)
+    CF = thrust_coefficient(defn.gamma, defn.expansion_ratio, pe_pc, pa_pc=0.0)
     At = throat_area(defn.thrust, defn.chamber_pressure, CF)
     mdot_total = mass_flow_rate(defn.chamber_pressure, At, defn.c_star)
 
@@ -231,8 +241,6 @@ def _solve_pressure_fed(defn: CycleDefinition) -> CyclePerformance:
     # System Isp (no cycle losses for pressure-fed)
     from resa_pro.utils.constants import G_0
 
-    ve = defn.c_star * defn.thrust / (defn.chamber_pressure * mdot_total / defn.chamber_pressure * defn.c_star)
-    # Simpler: Isp = F / (mdot * g0)
     Isp = defn.thrust / (mdot_total * G_0)
 
     return CyclePerformance(
@@ -308,13 +316,19 @@ def _solve_gas_generator(defn: CycleDefinition) -> CyclePerformance:
     turbine = Turbine(name="gg_turbine", efficiency=defn.turbine_efficiency)
     turbine_outlet_pressure = 1e5  # exhaust to ambient
 
+    # GG pressure and density from ideal gas law: rho = P / (R_specific * T)
+    gg_pressure = defn.chamber_pressure * 0.9  # slightly below Pc
+    # R_specific = cp * (gamma - 1) / gamma for ideal gas
+    R_gg = defn.turbine_gas_cp * (defn.turbine_gas_gamma - 1.0) / defn.turbine_gas_gamma
+    gg_density = gg_pressure / (R_gg * defn.turbine_inlet_temperature) if defn.turbine_inlet_temperature > 0 else 5.0
+
     def power_residual(gg_mdot: float) -> float:
         """Residual: turbine_power - pump_power = 0."""
         gg_inlet = FluidState(
-            pressure=defn.chamber_pressure * 0.9,  # GG pressure slightly below Pc
+            pressure=gg_pressure,
             temperature=defn.turbine_inlet_temperature,
             mass_flow=gg_mdot,
-            density=5.0,
+            density=gg_density,
             fluid_name="gg_exhaust",
         )
         turbine.compute(
@@ -340,10 +354,10 @@ def _solve_gas_generator(defn: CycleDefinition) -> CyclePerformance:
 
     # Final turbine computation with balanced mass flow
     gg_inlet_final = FluidState(
-        pressure=defn.chamber_pressure * 0.9,
+        pressure=gg_pressure,
         temperature=defn.turbine_inlet_temperature,
         mass_flow=gg_mdot_balanced,
-        density=5.0,
+        density=gg_density,
         fluid_name="gg_exhaust",
     )
     turbine.compute(
@@ -448,22 +462,27 @@ def _solve_expander(defn: CycleDefinition) -> CyclePerformance:
         total_pump = ox_pump.power() + fuel_pump.power()
 
         # Fuel goes through cooling jacket (HX): heated by chamber wall
+        pump_dT = fuel_pump.power() / (mdot_fuel * defn.fuel_cp) if mdot_fuel > 0 else 0.0
         cold_in = FluidState(
             pressure=p_pump_out,
-            temperature=293.0 + fuel_pump.power() / (mdot_fuel * 2500.0),
+            temperature=293.0 + pump_dT,
             mass_flow=mdot_fuel,
             density=defn.fuel_density,
             fluid_name="fuel",
         )
         # Hot side = chamber wall gas temperature representation
+        T_wall_hot = defn.Tc * defn.wall_recovery_fraction
+        # Hot-side density from ideal gas: rho = P / (R * T), approximate R
+        R_hot = defn.turbine_gas_cp * (defn.turbine_gas_gamma - 1.0) / defn.turbine_gas_gamma
+        rho_hot = defn.chamber_pressure / (R_hot * T_wall_hot) if T_wall_hot > 0 else 5.0
         hot_in = FluidState(
             pressure=defn.chamber_pressure,
-            temperature=defn.Tc * 0.4,  # wall recovery ~40% of Tc
+            temperature=T_wall_hot,
             mass_flow=mdot_total,  # notional
-            density=5.0,
+            density=rho_hot,
             fluid_name="hot_gas",
         )
-        hx.compute(hot_in, cold_inlet=cold_in, cp_hot=1500.0, cp_cold=2500.0)
+        hx.compute(hot_in, cold_inlet=cold_in, cp_hot=defn.turbine_gas_cp, cp_cold=defn.fuel_cp)
         heated_fuel = hx.cold_outlet
 
         if heated_fuel is None:
@@ -482,7 +501,7 @@ def _solve_expander(defn: CycleDefinition) -> CyclePerformance:
             turbine_inlet,
             outlet_pressure=p_turbine_outlet,
             gamma=1.15,  # heated fuel vapor
-            cp=2500.0,
+            cp=defn.fuel_cp,
         )
 
         return abs(turbine.power()) - total_pump
@@ -493,10 +512,17 @@ def _solve_expander(defn: CycleDefinition) -> CyclePerformance:
     p_max = p_min + 50e5  # up to 50 bar above minimum
 
     try:
-        p_balanced = brentq(solve_for_pump_discharge, p_min, p_max, xtol=1e3)
+        p_balanced = brentq(solve_for_pump_discharge, p_min, p_max, xtol=100.0)
     except ValueError:
-        logger.warning("Expander power balance not converged, using midpoint estimate")
-        p_balanced = (p_min + p_max) / 2.0
+        # Fallback: sweep to find best point
+        logger.warning("Expander power balance root not bracketed, sweeping for best point")
+        best_residual = float("inf")
+        p_balanced = p_min
+        for p_try in np.linspace(p_min, p_max, 20):
+            r = abs(solve_for_pump_discharge(p_try))
+            if r < best_residual:
+                best_residual = r
+                p_balanced = p_try
 
     # Final solve at balanced pressure
     solve_for_pump_discharge(p_balanced)

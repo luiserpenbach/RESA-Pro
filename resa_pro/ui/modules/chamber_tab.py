@@ -20,8 +20,9 @@ from resa_pro.ui.widgets.result_display import LogPanel, ResultTable
 
 
 class ChamberTab(QWidget):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, shared: object | None = None) -> None:
         super().__init__(parent)
+        self._shared = shared
         splitter = QSplitter()
         layout = QHBoxLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)
@@ -121,6 +122,16 @@ class ChamberTab(QWidget):
 
             # Store for other tabs to use
             self._last_geom = geom
+            if self._shared is not None:
+                self._shared.update("chamber_geometry", geom)
+                self._shared.update("chamber_contour", (x, y))
+                self._shared.update("operating_point", {
+                    "oxidizer": v["oxidizer"],
+                    "fuel": v["fuel"],
+                    "mixture_ratio": v["mixture_ratio"],
+                    "thrust": v["thrust"],
+                    "chamber_pressure": v["chamber_pressure"],
+                })
 
         except Exception as e:
             self.log.log(f"ERROR: {e}")
