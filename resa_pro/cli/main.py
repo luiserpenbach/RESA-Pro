@@ -38,6 +38,7 @@ from resa_pro.cli.report_cmd import report  # noqa: E402
 from resa_pro.cli.cycle_cmd import cycle  # noqa: E402
 from resa_pro.cli.optimize_cmd import optimize  # noqa: E402
 from resa_pro.cli.uq_cmd import uq  # noqa: E402
+from resa_pro.cli.gui_cmd import gui  # noqa: E402
 
 cli.add_command(chamber)
 cli.add_command(nozzle)
@@ -50,6 +51,7 @@ cli.add_command(report)
 cli.add_command(cycle)
 cli.add_command(optimize)
 cli.add_command(uq)
+cli.add_command(gui)
 
 
 def main() -> None:
