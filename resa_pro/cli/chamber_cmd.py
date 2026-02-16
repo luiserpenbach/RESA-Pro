@@ -130,6 +130,8 @@ def chamber(
                 "throat_upstream_radius": geom.throat_upstream_radius,
                 "throat_downstream_radius": geom.throat_downstream_radius,
                 "mass_flow": geom.mass_flow,
+                "contour_x": geom.contour_x.tolist(),
+                "contour_y": geom.contour_y.tolist(),
             },
         )
         save_design_json(state, output)
