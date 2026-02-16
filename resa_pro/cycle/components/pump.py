@@ -46,6 +46,7 @@ class Pump(CycleComponent):
         self,
         inlet: FluidState,
         outlet_pressure: float = 0.0,
+        cp: float = 0.0,
         **kwargs: Any,
     ) -> FluidState:
         """Compute pump outlet state.
@@ -57,11 +58,11 @@ class Pump(CycleComponent):
         The outlet temperature rise is:
             ΔT = W_actual / (ṁ · cp)
 
-        Since we don't track cp here, we estimate it from enthalpy.
-
         Args:
             inlet: Inlet fluid state.
             outlet_pressure: Required outlet pressure [Pa].
+            cp: Specific heat of the fluid [J/(kg·K)]. If 0, uses a
+                rough estimate based on density (liquid vs gas).
 
         Returns:
             Outlet fluid state.
@@ -81,8 +82,13 @@ class Pump(CycleComponent):
         # Outlet enthalpy
         h_out = inlet.enthalpy + w_actual
 
-        # Estimate temperature rise (assume cp ~ 2000 J/(kg·K) if not known)
-        cp_est = 2000.0
+        # Temperature rise from absorbed work
+        if cp > 0:
+            cp_est = cp
+        elif rho > 500:
+            cp_est = 2000.0  # liquid-like
+        else:
+            cp_est = 1000.0  # gas-like
         dT = w_actual / cp_est
 
         outlet = FluidState(

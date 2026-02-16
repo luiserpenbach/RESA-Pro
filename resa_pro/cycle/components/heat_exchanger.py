@@ -6,10 +6,13 @@ method for thermal energy transfer between hot and cold fluid streams.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
 from resa_pro.cycle.components.base import CycleComponent, FluidState
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -101,6 +104,17 @@ class HeatExchanger(CycleComponent):
         # Temperature changes
         dT_hot = Q_actual / C_hot if C_hot > 0 else 0.0
         dT_cold = Q_actual / C_cold if C_cold > 0 else 0.0
+
+        # Pinch point check: cold outlet must not exceed hot inlet
+        T_cold_out = cold_inlet.temperature + dT_cold
+        if T_cold_out > inlet.temperature and dT_cold > 0:
+            dT_cold = max(inlet.temperature - cold_inlet.temperature, 0.0)
+            Q_actual = dT_cold * C_cold if C_cold > 0 else 0.0
+            dT_hot = Q_actual / C_hot if C_hot > 0 else 0.0
+            logger.warning(
+                "HX pinch point: clamped cold outlet to hot inlet temp "
+                f"({inlet.temperature:.1f} K)"
+            )
 
         hot_outlet = FluidState(
             pressure=inlet.pressure - self._dp_hot,

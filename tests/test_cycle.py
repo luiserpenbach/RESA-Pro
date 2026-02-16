@@ -186,6 +186,46 @@ class TestPipe:
         assert "reynolds" in s
 
 
+class TestPumpCp:
+    """Test that pump accepts cp parameter."""
+
+    def test_custom_cp_changes_dT(self):
+        """Higher cp should give smaller temperature rise."""
+        pump_low_cp = Pump(efficiency=0.65)
+        pump_high_cp = Pump(efficiency=0.65)
+
+        out_low = pump_low_cp.compute(_ethanol_inlet(), outlet_pressure=30e5, cp=1000.0)
+        out_high = pump_high_cp.compute(_ethanol_inlet(), outlet_pressure=30e5, cp=4000.0)
+
+        # Same power, but higher cp → less dT
+        assert out_low.temperature > out_high.temperature
+
+    def test_default_cp_from_density(self):
+        """Without explicit cp, should estimate from density."""
+        pump = Pump(efficiency=0.65)
+        # liquid density > 500 → cp_est = 2000
+        inlet = FluidState(pressure=5e5, temperature=300.0, mass_flow=0.5,
+                           density=800.0, fluid_name="liquid")
+        out = pump.compute(inlet, outlet_pressure=30e5)
+        assert out.temperature > inlet.temperature
+
+
+class TestTurbineDensity:
+    """Test turbine outlet density uses temperature correction."""
+
+    def test_outlet_density_accounts_for_temperature(self):
+        """Outlet density should account for T_in/T_out, not just P ratio."""
+        turb = Turbine(efficiency=0.60)
+        inlet = _hot_gas_inlet()
+        outlet = turb.compute(inlet, outlet_pressure=2e5, gamma=1.3, cp=1500.0)
+
+        # Simple P-ratio only: rho_out = 5.0 * (2e5/20e5) = 0.5
+        # With T correction: rho_out = 5.0 * (2e5/20e5) * (T_in/T_out)
+        # T_out < T_in, so T_in/T_out > 1, so corrected density > 0.5
+        simple_rho = inlet.density * (outlet.pressure / inlet.pressure)
+        assert outlet.density > simple_rho
+
+
 class TestCycleIntegration:
     """Test chaining cycle components together."""
 

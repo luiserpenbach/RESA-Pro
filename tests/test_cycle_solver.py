@@ -128,6 +128,83 @@ class TestExpanderCycle:
         assert len(result.component_summaries) >= 3  # ox_pump, fuel_pump, hx, turbine
 
 
+class TestExpansionRatio:
+    """Test that expansion_ratio is properly used instead of hardcoded."""
+
+    def test_expansion_ratio_affects_isp(self):
+        """Different expansion ratios should produce different Isp."""
+        defn_low = CycleDefinition(
+            cycle_type=CycleType.PRESSURE_FED,
+            expansion_ratio=5.0,
+        )
+        defn_high = CycleDefinition(
+            cycle_type=CycleType.PRESSURE_FED,
+            expansion_ratio=50.0,
+        )
+        result_low = solve_cycle(defn_low)
+        result_high = solve_cycle(defn_high)
+
+        # Higher expansion ratio → higher vacuum Isp
+        assert result_high.Isp_delivered > result_low.Isp_delivered
+
+    def test_expansion_ratio_affects_mass_flow(self):
+        """Different expansion ratios change thrust coefficient and thus mass flow."""
+        defn_a = CycleDefinition(
+            cycle_type=CycleType.PRESSURE_FED,
+            expansion_ratio=5.0,
+            thrust=2000.0,
+        )
+        defn_b = CycleDefinition(
+            cycle_type=CycleType.PRESSURE_FED,
+            expansion_ratio=20.0,
+            thrust=2000.0,
+        )
+        result_a = solve_cycle(defn_a)
+        result_b = solve_cycle(defn_b)
+
+        # Same thrust, different CF → different mass flow
+        assert result_a.total_mass_flow != pytest.approx(result_b.total_mass_flow, rel=0.01)
+
+    def test_expansion_ratio_in_gg_cycle(self):
+        """Gas-generator cycle should also respect expansion_ratio."""
+        defn = CycleDefinition(
+            cycle_type=CycleType.GAS_GENERATOR,
+            expansion_ratio=15.0,
+            thrust=10000.0,
+            chamber_pressure=5e6,
+        )
+        result = solve_cycle(defn)
+        assert result.Isp_delivered > 0
+        assert result.pump_power_total > 0
+
+    def test_default_expansion_ratio(self):
+        """Default expansion ratio should be 10."""
+        defn = CycleDefinition()
+        assert defn.expansion_ratio == 10.0
+
+
+class TestNewCycleFields:
+    """Test new fields on CycleDefinition."""
+
+    def test_fuel_cp_field(self):
+        defn = CycleDefinition(fuel_cp=3000.0)
+        assert defn.fuel_cp == 3000.0
+
+    def test_wall_recovery_fraction_field(self):
+        defn = CycleDefinition(wall_recovery_fraction=0.3)
+        assert defn.wall_recovery_fraction == 0.3
+
+    def test_expander_with_custom_fuel_cp(self):
+        """Expander cycle should use fuel_cp parameter."""
+        defn = CycleDefinition(
+            cycle_type=CycleType.EXPANDER,
+            fuel_cp=3500.0,
+            Tc=3400.0,
+        )
+        result = solve_cycle(defn)
+        assert result.Isp_delivered > 0
+
+
 class TestCycleComparison:
     """Compare cycle architectures."""
 

@@ -128,3 +128,56 @@ class TestHtmlReport:
     def test_empty_state(self):
         report = generate_html_report(DesignState())
         assert "</html>" in report
+
+
+class TestReportCycleSection:
+    """Test that cycle analysis data appears in reports."""
+
+    def _state_with_cycle(self) -> DesignState:
+        state = _make_state()
+        state.performance["cycle"] = {
+            "cycle_type": "gas_generator",
+            "Isp_delivered": 285.0,
+            "total_mass_flow": 3.5,
+            "pump_power_total": 45000.0,
+            "turbine_power_total": 45200.0,
+            "power_balance_error": 200.0,
+            "tank_pressure_ox": 3e5,
+            "tank_pressure_fuel": 3e5,
+        }
+        return state
+
+    def test_text_report_cycle_section(self):
+        report = generate_text_report(self._state_with_cycle())
+        assert "CYCLE ANALYSIS" in report
+        assert "Gas Generator" in report
+        assert "285" in report  # Isp
+
+    def test_html_report_cycle_section(self):
+        report = generate_html_report(self._state_with_cycle())
+        assert "Cycle Analysis" in report
+        assert "Gas Generator" in report
+
+
+class TestReportOptimizationSection:
+    """Test that optimization data appears in reports."""
+
+    def _state_with_opt(self) -> DesignState:
+        state = _make_state()
+        state.performance["optimization"] = {
+            "method": "differential_evolution",
+            "n_evaluations": 150,
+            "best_variables": {"chamber_pressure": 3.5e6, "expansion_ratio": 12.0},
+            "best_objectives": {"Isp_vac": 290.5},
+        }
+        return state
+
+    def test_text_report_optimization_section(self):
+        report = generate_text_report(self._state_with_opt())
+        assert "OPTIMIZATION RESULTS" in report
+        assert "differential_evolution" in report
+
+    def test_html_report_optimization_section(self):
+        report = generate_html_report(self._state_with_opt())
+        assert "Optimization Results" in report
+        assert "differential_evolution" in report

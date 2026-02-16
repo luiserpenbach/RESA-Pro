@@ -213,3 +213,27 @@ class TestDOE:
 
         for p1, p2 in zip(pts1, pts2):
             assert p1.variables["x"] == pytest.approx(p2.variables["x"])
+
+
+class TestOptimizerMethods:
+    """Test that different optimizer methods work correctly."""
+
+    def test_powell(self):
+        opt = DesignOptimizer()
+        opt.add_variable(DesignVariable("x", -10.0, 10.0))
+        opt.add_variable(DesignVariable("y", -10.0, 10.0))
+        opt.add_objective(Objective("f", "f", direction="minimize"))
+
+        result = opt.optimize(_quadratic_eval, method="powell", max_iter=200, tol=1e-6)
+        assert result.best is not None
+        assert result.best.objectives["f"] < 1.0
+
+    def test_l_bfgs_b(self):
+        opt = DesignOptimizer()
+        opt.add_variable(DesignVariable("x", -10.0, 10.0))
+        opt.add_variable(DesignVariable("y", -10.0, 10.0))
+        opt.add_objective(Objective("f", "f", direction="minimize"))
+
+        result = opt.optimize(_quadratic_eval, method="L-BFGS-B", max_iter=200, tol=1e-8)
+        assert result.best is not None
+        assert result.best.objectives["f"] < 1.0
