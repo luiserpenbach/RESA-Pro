@@ -35,6 +35,9 @@ from resa_pro.cli.cooling_cmd import cooling  # noqa: E402
 from resa_pro.cli.feed_cmd import feed  # noqa: E402
 from resa_pro.cli.geometry_cmd import export_stl  # noqa: E402
 from resa_pro.cli.report_cmd import report  # noqa: E402
+from resa_pro.cli.cycle_cmd import cycle  # noqa: E402
+from resa_pro.cli.optimize_cmd import optimize  # noqa: E402
+from resa_pro.cli.uq_cmd import uq  # noqa: E402
 
 cli.add_command(chamber)
 cli.add_command(nozzle)
@@ -44,6 +47,9 @@ cli.add_command(cooling)
 cli.add_command(feed)
 cli.add_command(export_stl)
 cli.add_command(report)
+cli.add_command(cycle)
+cli.add_command(optimize)
+cli.add_command(uq)
 
 
 def main() -> None:

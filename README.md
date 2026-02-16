@@ -11,8 +11,12 @@ RESA Pro provides advanced capabilities for chamber sizing, nozzle contour gener
 - **Thermal Analysis** — Bartz heat transfer, heat flux distribution, radiative cooling, wall temperature estimation
 - **Real Gas Properties** — CoolProp integration with 10 propellants (ethanol, N2O, LOX, RP-1, methane, hydrogen, etc.)
 - **Material Database** — temperature-dependent properties for copper alloys, stainless steel, Inconel, aluminum, and ablatives
+- **Thermodynamic Cycle Solver** — pressure-fed, gas-generator, and expander cycles with power balance
+- **Optimization Framework** — design space exploration, DOE (Latin Hypercube), sensitivity analysis, SciPy-based optimization
+- **Uncertainty Quantification** — Monte Carlo propagation, variance-based sensitivity indices, correlation analysis
+- **Plugin System** — extensible plugin manager with filesystem and entry-point discovery
 - **Design Persistence** — JSON + HDF5 save/load with version metadata
-- **CLI Interface** — Rich-formatted terminal output for quick sizing and analysis
+- **CLI Interface** — Rich-formatted terminal output with 11 command groups
 
 ## Installation
 
@@ -174,11 +178,12 @@ pytest tests/ -v
 
 ## Roadmap
 
-- **Phase 0** (current) — Core library, CLI, basic analysis
-- **Phase 1** — Advanced nozzle (real-gas MOC), regenerative cooling (two-phase), feed system sizing
-- **Phase 2** — PySide6 desktop application with 3D visualization
-- **Phase 3** — Plugin system, optimization framework, uncertainty quantification
-- **Phase 4** — Thermodynamic cycle solver (modular component-based simulation)
+- **Phase 0** ✅ — Core library, CLI, basic analysis
+- **Phase 1** ✅ — Advanced nozzle (real-gas MOC), regenerative cooling (two-phase), feed system sizing
+- **Phase 2** (partial) — PySide6 desktop application with 3D visualization (STL export and reports complete)
+- **Phase 3** ✅ — Plugin system with manager, optimization framework (DOE, sensitivity, single/multi-objective), uncertainty quantification (Monte Carlo, variance-based sensitivity indices)
+- **Phase 4** ✅ — Thermodynamic cycle solver: pressure-fed, gas-generator, and expander cycles with power balance
+- **Phase 5** (planned) — PySide6 desktop GUI with interactive design tools and PyVista 3D visualization
 
 ## License
 
