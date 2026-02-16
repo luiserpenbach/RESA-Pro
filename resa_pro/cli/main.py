@@ -30,10 +30,16 @@ def cli(ctx: click.Context) -> None:
 from resa_pro.cli.chamber_cmd import chamber  # noqa: E402
 from resa_pro.cli.nozzle_cmd import nozzle  # noqa: E402
 from resa_pro.cli.info_cmd import info  # noqa: E402
+from resa_pro.cli.injector_cmd import injector  # noqa: E402
+from resa_pro.cli.cooling_cmd import cooling  # noqa: E402
+from resa_pro.cli.feed_cmd import feed  # noqa: E402
 
 cli.add_command(chamber)
 cli.add_command(nozzle)
 cli.add_command(info)
+cli.add_command(injector)
+cli.add_command(cooling)
+cli.add_command(feed)
 
 
 def main() -> None:
